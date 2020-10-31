@@ -17,7 +17,7 @@ bot.command :help do | event |
         embed.title = "Command List"
         embed.url = "https://github.com/approvers/rigel"
         embed.colour = 0x00ccff
-        embed.description = "```*r.help - このヘルプを表示\n*r.about - このボットの詳細を表示\n*r.LICENSE - ソースコードのライセンスを表示 ``` ***†新機能†*** \n メッセージに📧の絵文字をつけると自動的に学校からのお知らせチャンネルに転送します\n\n機能追加は言ってもらえば(僕の技術力の許す限り)しようと思いますのでよろしくお願いします"
+        embed.description = ""
         embed.footer = Discordrb::Webhooks::EmbedFooter.new(
             text: "このボットのソースコードはMITライセンスの元、オープンソースで公開されています",
         )
@@ -32,7 +32,7 @@ bot.message(start_with: "Q:") do | event |
         end
         $question_queue = $question_queue + 1
         bot.send_message(transfer_to, "#{event.author.name}さんからの質問:\n```#{message}```")
-        file = File.open("LT-Q.html", "w:UTF-8")
+        file = File.open("/var/www/html/LT-Q.html", "w:UTF-8")
         body = <<-EOS
 <center>
 <h1>†現在の質問数†</h1>
@@ -52,6 +52,23 @@ bot.command :queue do |event|
         text: "このボットのソースコードはMITライセンスの元、オープンソースで公開されています",
         )
   end
+end
+
+bot.command :reset do |event|
+    if event.author.id == 487393376078004225
+    $question_queue = 0
+    p "[debug] yes"
+    file = File.open("/var/www/html/LT-Q.html", "w:UTF-8")
+    body = <<-EOS
+<center>
+<h1>†現在の質問数†</h1>
+<h1 style="font-size: 90px;">質問はありません</h1>
+</center>
+    EOS
+    file.write(body)
+    else
+    p "[debug] no"
+    end
 end
 
 bot.run
