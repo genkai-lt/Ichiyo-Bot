@@ -3,41 +3,19 @@ require 'dotenv'
 
 Dotenv.load
 
-info_channel = ENV['CHANNEL_ID']
 transfer_to = ENV['TRANSFER']
-
+$question_queue = 0
 bot = Discordrb::Commands::CommandBot.new(
     token: ENV['TOKEN'],
     client_id: ENV['CLIENT_ID'],
-    prefix:'*r.',
+    prefix:'!Q.',
     )
 
-bot.command :hello do | message |
-    message.send_message("hello,world.#{message.user.name}")
-end
-
-
-bot.command :about do |event|
-    event.send_embed do |embed|
-        embed.title = "About Rigel"
-        embed.url = "https://github.com/laminne/rigel"
-        embed.colour = 0x00ccff
-        embed.description = "**CotTyanをRuby(Discordrb)で書き直すプロジェクト**"
-        embed.footer = Discordrb::Webhooks::EmbedFooter.new(
-            text: "このボットのソースコードはMITライセンスの元、オープンソースで公開されています",
-        )
-        embed.author = Discordrb::Webhooks::EmbedAuthor.new(
-          name: 'Laminne',
-          url: 'https://github.com/laminne',
-          icon_url: 'https://github.com/laminne.png'
-        )
-        end
-  end
 
 bot.command :help do | event |
     event.send_embed do | embed |
         embed.title = "Command List"
-        embed.url = "https://github.com/laminne/rigel"
+        embed.url = "https://github.com/approvers/rigel"
         embed.colour = 0x00ccff
         embed.description = "```*r.help - このヘルプを表示\n*r.about - このボットの詳細を表示\n*r.LICENSE - ソースコードのライセンスを表示 ``` ***†新機能†*** \n メッセージに📧の絵文字をつけると自動的に学校からのお知らせチャンネルに転送します\n\n機能追加は言ってもらえば(僕の技術力の許す限り)しようと思いますのでよろしくお願いします"
         embed.footer = Discordrb::Webhooks::EmbedFooter.new(
@@ -46,61 +24,41 @@ bot.command :help do | event |
     end
 end
 
-bot.command :LICENSE do |event|
-    event.send_embed do |embed|
-        embed.title = "LICENSE"
-        embed.url = "https://github.com/laminne/rigel"
-        embed.colour = 0x00ccff
-        embed.description = "```MIT License
-
-      Copyright (c) 2020 Tatsuto Laminne Yamamoto
-      
-      Permission is hereby granted, free of charge, to any person obtaining a copy
-      of this software and associated documentation files (the \"Software\"), to deal
-      in the Software without restriction, including without limitation the rights
-      to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-      copies of the Software, and to permit persons to whom the Software is
-      furnished to do so, subject to the following conditions:
-      
-      The above copyright notice and this permission notice shall be included in all
-      copies or substantial portions of the Software.
-      
-      THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-      SOFTWARE.```"
-        embed.footer = Discordrb::Webhooks::EmbedFooter.new(
-            text: "詳しくはプロジェクトページをご覧ください。",
-        )
-        embed.author = Discordrb::Webhooks::EmbedAuthor.new(
-            name: 'Laminne',
-            url: 'https://github.com/laminne',
-            icon_url: 'https://github.com/laminne.png'
-      )
-    end
-  end
-
-bot.voice_state_update do |event|
-    user = event.user.name
-
-    if event.channel == nil then
-        channel_name = event.old_channel.name
-        bot.send_message(info_channel, "```#{user} が #{channel_name}を出ました```")
-    else
-        channel_name = event.channel.name
-
-        bot.send_message(info_channel, " ```#{user} が #{channel_name}に入りました```")
-    end
+bot.message(start_with: "Q:") do | event |
+        p("てすと")
+        message = event.message
+        if message.author == bot
+          break
+        end
+        $question_queue = $question_queue + 1
+        bot.send_message(transfer_to, "#{event.author.name}さんからの質問:\n```#{message}```")
+        file = File.open("LT-Q.html", "w:UTF-8")
+        body = <<-EOS
+        <!doctype html>
+        <html>
+        <head>
+        <meta http-equiv="refresh" content="10">
+        <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@900&display=swap" rel="stylesheet">
+        <style>body{font-family: 'Mplus 1p', sans-serif}</style>
+        </head>
+        <body>
+        <h1>#{$question_queue}</h1>
+        </body>
+        </html>
+        EOS
+        file.write(body)
 end
 
-bot.reaction_add do | event |
-    if event.emoji.name == "📧"
-        message = event.message
-        bot.send_message(transfer_to, "```#{message}```")        
-    end
+bot.command :queue do |event|
+    event.send_embed do | embed |
+    embed.title = "Question Queue"
+    embed.url = "https://github.com/laminne/rigel"
+    embed.colour = 0x00ccff
+    embed.description = "現在の質問の数:\n**#{$question_queue}**"
+    embed.footer = Discordrb::Webhooks::EmbedFooter.new(
+        text: "このボットのソースコードはMITライセンスの元、オープンソースで公開されています",
+        )
+  end
 end
 
 bot.run
