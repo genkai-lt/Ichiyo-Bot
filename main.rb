@@ -34,21 +34,10 @@ bot.message(start_with: "Q:") do | event |
         bot.send_message(transfer_to, "#{event.author.name}さんからの質問:\n```#{message}```")
         file = File.open("LT-Q.html", "w:UTF-8")
         body = <<-EOS
-        <!doctype html>
-        <html>
-        <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="refresh" content="10">
-        <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@900&display=swap" rel="stylesheet">
-        <style>body{font-family: 'Mplus 1p', sans-serif}</style>
-        </head>
-        <body>
-        <center>
-        <h1>†現在の質問数†</h1>
-        <h1 style="font-size: 90px;">#{$question_queue}</h1>
-        </center>
-        </body>
-        </html>
+<center>
+<h1>†現在の質問数†</h1>
+<h1 style="font-size: 90px;">#{$question_queue}</h1>
+</center>
         EOS
         file.write(body)
 end
