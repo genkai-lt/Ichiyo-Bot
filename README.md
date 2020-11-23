@@ -1,6 +1,7 @@
-# Rigel
+# Ichiyo-Bot
+限界LT#1で使用した一葉Botのソースコードです
 
-Python で書かれた CotTyan(v2.x)の一部を Ruby で書き直すプロジェクト
+~~Pythonで書かれたCotTyan(v2.x)の一部をRubyで書き直したものに元のPythonのコードを含めた意味不明なボットです~~
 
 ## 起動方法
 
